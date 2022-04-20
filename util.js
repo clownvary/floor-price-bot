@@ -7,7 +7,7 @@ import fs from 'fs';
 import axios from 'axios';
 import { JsonDB } from 'node-json-db';
 import { Config } from 'node-json-db/dist/lib/JsonDBConfig';
-import { TARGET_URL, COMMANDS_DIR_PATH, CHANNEL_ID, WATCH_TIMEOUT } from './config';
+import { COMMANDS_DIR_PATH, CHANNEL_ID, WATCH_TIMEOUT } from './config';
 
 const getCommandFiles = () => {
     return fs.readdirSync(COMMANDS_DIR_PATH).filter((file) => file.endsWith('.js'));
@@ -32,12 +32,13 @@ const sendMessage = async (client, interaction, message) => {
         await client.channels.cache.get(CHANNEL_ID).send(message);
     }
 };
-const runWatcher = async (client, interaction = null, doSomething) => {
+const runWatcher = async (client, interaction = null, mainWork) => {
     const { interval, enableWatch } = client;
-
     const watcher = async () => {
         const { enableWatch: currentEnableWatch } = client;
         if (currentEnableWatch) {
+            // do main logic here
+            mainWork(client, interaction);
             client.user.setActivity(`| ${client.count++}`, { type: 'WATCHING' });
         } else {
             clearInterval(interval);
@@ -54,19 +55,23 @@ const runWatcher = async (client, interaction = null, doSomething) => {
     }
 };
 
-const getPrice = (collectionName) => {
+const getStats = async (collectionName) => {
     const apiUrl = `https://api.opensea.io/api/v1/collection/${collectionName}/stats`;
-    const stats = axios
-        .get(apiUrl, {
+    let result = {};
+    try {
+        const {
+            data: { stats },
+        } = await axios.get(apiUrl, {
             headers: {
                 Accept: 'application/json',
                 Host: 'api.opensea.io',
             },
-        })
-        .then((res) => {
-            console.log('res', res);
         });
-    console.log('stats', stats);
+        result = stats;
+    } catch (error) {
+        console.error('request opensea api error', error);
+    }
+    return result;
 };
 
-export { getCommandFiles, getDb, getToken, resetWatcher, sendMessage, runWatcher, getPrice };
+export { getCommandFiles, getDb, getToken, resetWatcher, sendMessage, runWatcher, getStats };

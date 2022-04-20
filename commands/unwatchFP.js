@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { send, resetWatcherConfig } from '../util';
 
 module.exports = {
-    data: new SlashCommandBuilder().setName('unwatch').setDescription('Cancel watching floor price of collections'),
+    data: new SlashCommandBuilder().setName('unwatchFP').setDescription('Cancel watching floor price of collections'),
     async execute(client, interaction) {
         const { enableWatch } = client;
         if (enableWatch) {
