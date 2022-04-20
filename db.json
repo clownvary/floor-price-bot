@@ -1,0 +1,16 @@
+{
+    "collections": [
+        {
+            "name": "doodles-official",
+            "price": 10
+        },
+        {
+            "name": "cool-cats-nft",
+            "price": 6
+        },
+        {
+            "name": "azuki",
+            "price": 9
+        }
+    ]
+}
