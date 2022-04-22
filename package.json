@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "A discord bot for watching opensea collections floor price.",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "npx babel-node ./index.js",
+    "start": "npx babel-node --experimental-specifier-resolution=node ./index.js",
     "dev": "nodemon ./index.js",
-    "deploy_command": "node ./deploy-command.js"
+    "deploy_command": "npx babel-node --experimental-specifier-resolution=node ./deploy-command.js"
   },
   "repository": {
     "type": "git",

@@ -1,7 +1,10 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable global-require */
+/* eslint-disable import/no-dynamic-require */
 /* eslint-disable no-restricted-syntax */
 import { Client, Collection, Intents } from 'discord.js';
 
-import { getCommandFiles, getToken, resetWatcher, runWatcher } from './util';
+import { getCommandFiles, getToken, stopWatcher, runWatcher } from './util';
 import { COMMANDS_DIR_PATH } from './config';
 import { mainWork } from './mainWork';
 
@@ -15,10 +18,10 @@ const client = new Client({
 
 client.commands = new Collection();
 // // init watcher config
-resetWatcher(client);
+stopWatcher(client);
 
 for (const file of commandFiles) {
-    const command = import(`${COMMANDS_DIR_PATH}/${file}`);
+    const { default: command } = await import(`${COMMANDS_DIR_PATH}/${file}`);
     // Set a new item in the Collection
     // With the key as the command name and the value as the exported module
     client.commands.set(command.data.name, command);
@@ -26,7 +29,7 @@ for (const file of commandFiles) {
 
 // When the client is ready, run this code (only once)
 client.once('ready', async () => {
-    await runWatcher(client, null, mainWork);
+    // await runWatcher(client, null, mainWork);
     console.log('Floor price bot is online!');
 });
 

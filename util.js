@@ -7,7 +7,7 @@ import fs from 'fs';
 import axios from 'axios';
 import { JsonDB } from 'node-json-db';
 import { Config } from 'node-json-db/dist/lib/JsonDBConfig';
-import { COMMANDS_DIR_PATH, CHANNEL_ID, WATCH_TIMEOUT } from './config';
+import { COMMANDS_DIR_PATH, CHANNEL_ID, WATCH_TIMEOUT, ALERT_INTERNAL } from './config';
 
 const getCommandFiles = () => {
     return fs.readdirSync(COMMANDS_DIR_PATH).filter((file) => file.endsWith('.js'));
@@ -20,13 +20,13 @@ const getDb = () => {
 const getToken = () => {
     return process.env['TOKEN'];
 };
-const resetWatcher = (client) => {
+const stopWatcher = (client) => {
     client.enableWatch = false;
     client.interval = null;
     client.count = 0;
 };
 const sendMessage = async (client, interaction, message) => {
-    if (interaction) {
+    if (interaction && !interaction.replied && !interaction.deferred) {
         await interaction.reply(message);
     } else {
         await client.channels.cache.get(CHANNEL_ID).send(message);
@@ -34,15 +34,16 @@ const sendMessage = async (client, interaction, message) => {
 };
 const runWatcher = async (client, interaction = null, mainWork) => {
     const { interval, enableWatch } = client;
+
     const watcher = async () => {
         const { enableWatch: currentEnableWatch } = client;
         if (currentEnableWatch) {
             // do main logic here
-            mainWork(client, interaction);
+            await mainWork(client, interaction);
             client.user.setActivity(`| ${client.count++}`, { type: 'WATCHING' });
         } else {
             clearInterval(interval);
-            resetWatcher(client);
+            stopWatcher(client);
             client.user.setActivity('UNWATCHING');
         }
     };
@@ -74,4 +75,9 @@ const getStats = async (collectionName) => {
     return result;
 };
 
-export { getCommandFiles, getDb, getToken, resetWatcher, sendMessage, runWatcher, getStats };
+// whether current now time is a valid trigger time
+const isValidTrigger = (lastAlertStamp, currentStamp) => {
+    return currentStamp - lastAlertStamp > ALERT_INTERNAL * 1000;
+};
+
+export { getCommandFiles, getDb, getToken, stopWatcher, sendMessage, runWatcher, getStats, isValidTrigger };

@@ -2,15 +2,18 @@
     "collections": [
         {
             "name": "doodles-official",
-            "price": 10
-        },
-        {
-            "name": "cool-cats-nft",
-            "price": 6
+            "price": 11,
+            "lastAlertStamp": 1650613569126
         },
         {
             "name": "azuki",
-            "price": 9
+            "price": 20,
+            "lastAlertStamp": 1650612543466
+        },
+        {
+            "name": "invisiblefriends",
+            "price": 5,
+            "lastAlertStamp": 1650613569127
         }
     ]
 }

@@ -1,3 +1,6 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable global-require */
+/* eslint-disable import/no-dynamic-require */
 /* eslint-disable no-restricted-syntax */
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
@@ -11,7 +14,7 @@ const rest = new REST({ version: '9' }).setToken(TOKEN);
 const commandFiles = getCommandFiles();
 
 for (const file of commandFiles) {
-    const command = import(`${COMMANDS_DIR_PATH}/${file}`);
+    const { default: command } = await import(`${COMMANDS_DIR_PATH}/${file}`);
     commands.push(command.data.toJSON());
 }
 // regist commands
