@@ -2,23 +2,18 @@
     "collections": [
         {
             "name": "doodles-official",
-            "price": 11,
-            "lastAlertStamp": 1650723756714
-        },
-        {
-            "name": "azuki",
-            "price": 20,
-            "lastAlertStamp": 1650723756714
+            "price": 15.8,
+            "lastAlertStamp": 1650727605894
         },
         {
             "name": "invisiblefriends",
             "price": 5,
-            "lastAlertStamp": 1650723756715
+            "lastAlertStamp": 1650727605895
         },
         {
             "name": "official-moar-by-joan-cornella",
             "price": 1,
-            "lastAlertStamp": 1650723756715
+            "lastAlertStamp": 1650727605895
         }
     ]
 }
