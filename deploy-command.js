@@ -18,6 +18,6 @@ for (const file of commandFiles) {
     commands.push(command.data.toJSON());
 }
 // regist commands
-rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), { body: commands })
+rest.put(Routes.applicationCommands(CLIENT_ID), { body: commands })
     .then(() => console.log('Successfully registered application commands.'))
     .catch((error) => console.error(error));

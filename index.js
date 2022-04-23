@@ -8,7 +8,7 @@ import { getCommandFiles, getToken, stopWatcher, runWatcher } from './util';
 import { COMMANDS_DIR_PATH } from './config';
 import { mainWork } from './mainWork';
 
-// import './keep-alive';
+import './keep-alive';
 
 const TOKEN = getToken();
 const commandFiles = getCommandFiles();
@@ -29,7 +29,7 @@ for (const file of commandFiles) {
 
 // When the client is ready, run this code (only once)
 client.once('ready', async () => {
-    // await runWatcher(client, null, mainWork);
+    await runWatcher(client, null, mainWork);
     console.log('Floor price bot is online!');
 });
 

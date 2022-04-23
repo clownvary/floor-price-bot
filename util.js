@@ -7,8 +7,21 @@ import fs from 'fs';
 import axios from 'axios';
 import { JsonDB } from 'node-json-db';
 import { Config } from 'node-json-db/dist/lib/JsonDBConfig';
+import { MessageEmbed } from 'discord.js';
 import { COMMANDS_DIR_PATH, CHANNEL_ID, WATCH_TIMEOUT, ALERT_INTERNAL } from './config';
 
+const MESSAGE_TYPE = {
+    INFO: 'Info',
+    WARN: 'Warn',
+    ERROR: 'Error',
+    SUCCEED: 'Succeed',
+};
+const MESSAGE_TYPE_COLOR = {
+    [MESSAGE_TYPE.INFO]: '#0099ff', // blue
+    [MESSAGE_TYPE.WARN]: '#ecea2c', // yellow
+    [MESSAGE_TYPE.ERROR]: '#e2053e', // red
+    [MESSAGE_TYPE.SUCCEED]: '#05e226', // green
+};
 const getCommandFiles = () => {
     return fs.readdirSync(COMMANDS_DIR_PATH).filter((file) => file.endsWith('.js'));
 };
@@ -25,13 +38,16 @@ const stopWatcher = (client) => {
     client.interval = null;
     client.count = 0;
 };
-const sendMessage = async (client, interaction, message) => {
+const sendMessage = async (client, interaction, message, type = MESSAGE_TYPE.INFO, fieldTitle) => {
+    const title = fieldTitle || type;
+    const exampleEmbed = new MessageEmbed().setColor(MESSAGE_TYPE_COLOR[type]).addField(title, message, true);
     if (interaction && !interaction.replied && !interaction.deferred) {
-        await interaction.reply(message);
+        await interaction.reply({ embeds: [exampleEmbed], ephemeral: false });
     } else {
-        await client.channels.cache.get(CHANNEL_ID).send(message);
+        await client.channels.cache.get(CHANNEL_ID).send({ embeds: [exampleEmbed] });
     }
 };
+
 const runWatcher = async (client, interaction = null, mainWork) => {
     const { interval, enableWatch } = client;
 
@@ -56,21 +72,41 @@ const runWatcher = async (client, interaction = null, mainWork) => {
     }
 };
 
-const getStats = async (collectionName) => {
+const getSingleStats = async (collectionName) => {
     const apiUrl = `https://api.opensea.io/api/v1/collection/${collectionName}/stats`;
     let result = {};
     try {
-        const {
-            data: { stats },
-        } = await axios.get(apiUrl, {
+        result = await axios.get(apiUrl, {
             headers: {
                 Accept: 'application/json',
                 Host: 'api.opensea.io',
             },
         });
-        result = stats;
     } catch (error) {
-        console.error('request opensea api error', error);
+        // console.error('request opensea api error', error);
+    }
+    return result;
+};
+
+const getStats = async (collectionName) => {
+    const {
+        data: { stats },
+    } = await getSingleStats(collectionName);
+    return stats;
+};
+
+const isValidNewCollection = async (collectionName, price) => {
+    const db = getDb();
+    const collections = db.getData('/collections');
+    const result = { validName: false, validPrice: false };
+    const isExisted = collections.filter((collection) => collection.name === collectionName).length >= 1;
+    const { status, data: { stats = {} } = {} } = await getSingleStats(collectionName);
+    if (status === 200 && !isExisted) {
+        result.validName = true;
+        // watch price must lower than current price
+        if (price < stats.floor_price) {
+            result.validPrice = true;
+        }
     }
     return result;
 };
@@ -80,4 +116,15 @@ const isValidTrigger = (lastAlertStamp, currentStamp) => {
     return currentStamp - lastAlertStamp > ALERT_INTERNAL * 1000;
 };
 
-export { getCommandFiles, getDb, getToken, stopWatcher, sendMessage, runWatcher, getStats, isValidTrigger };
+export {
+    getCommandFiles,
+    getDb,
+    getToken,
+    sendMessage,
+    runWatcher,
+    stopWatcher,
+    getStats,
+    isValidTrigger,
+    isValidNewCollection,
+    MESSAGE_TYPE,
+};
