@@ -1,6 +1,6 @@
 # Chikoroko-bot
 
-A discord bot for watching opensea collections floor price..
+A discord bot for watching opensea collections floor price.
 
 ![demo](./assets/demo.gif)
 
