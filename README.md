@@ -1,4 +1,4 @@
-# Chikoroko-bot
+# floor-price-bot
 
 A discord bot for watching opensea collections floor price.
 
