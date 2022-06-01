@@ -104,7 +104,7 @@ const isValidNewCollection = async (collectionName, price) => {
     if (status === 200 && !isExisted) {
         result.validName = true;
         // watch price must lower than current price
-        if (price < stats.floor_price) {
+        if (0 < price) {
             result.validPrice = true;
         }
     }
