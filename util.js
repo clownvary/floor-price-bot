@@ -8,7 +8,8 @@ import axios from 'axios';
 import { JsonDB } from 'node-json-db';
 import { Config } from 'node-json-db/dist/lib/JsonDBConfig';
 import { MessageEmbed } from 'discord.js';
-import { COMMANDS_DIR_PATH, CHANNEL_ID, WATCH_TIMEOUT, ALERT_INTERNAL } from './config';
+import { createAudioPlayer, createAudioResource, joinVoiceChannel,getVoiceConnection   } from '@discordjs/voice';
+import { COMMANDS_DIR_PATH, CHANNEL_ID, WATCH_TIMEOUT, ALERT_INTERNAL, GUILD_ID, VOICE_CHANNEL_ID } from './config';
 
 const MESSAGE_TYPE = {
     INFO: 'Info',
@@ -104,7 +105,7 @@ const isValidNewCollection = async (collectionName, price) => {
     if (status === 200 && !isExisted) {
         result.validName = true;
         // watch price must lower than current price
-        if (0 < price) {
+        if (price < stats.floor_price) {
             result.validPrice = true;
         }
     }
@@ -115,6 +116,37 @@ const isValidNewCollection = async (collectionName, price) => {
 const isValidTrigger = (lastAlertStamp, currentStamp) => {
     return currentStamp - lastAlertStamp > ALERT_INTERNAL * 1000;
 };
+
+const getPlayer = () => {
+    const player = createAudioPlayer();
+    const resource = createAudioResource('./assets/alert.wav');
+    player.play(resource);
+    return player;
+}
+const getVoiceConnection = (client) => {
+    const connection = joinVoiceChannel({
+        channelId: VOICE_CHANNEL_ID,
+        guildId: GUILD_ID,
+        adapterCreator: client.channels.cache.get(VOICE_CHANNEL_ID).guild.voiceAdapterCreator,
+    });
+    return connection;
+
+
+
+};
+const playAlertSound = (client) => {
+    const player = getPlayer();
+    const connection = getVoiceConnection(client);
+    const subscription = connection.subscribe(player);
+    // subscription could be undefined if the connection is destroyed!
+    if (subscription) {
+        // Unsubscribe after 5 seconds (stop playing audio on the voice connection)
+        setTimeout(() => {
+            subscription.unsubscribe();
+            connection.destroy();
+        }, 10000);
+    }
+}
 
 export {
     getCommandFiles,
@@ -127,4 +159,5 @@ export {
     isValidTrigger,
     isValidNewCollection,
     MESSAGE_TYPE,
+    playAlertSound,
 };
