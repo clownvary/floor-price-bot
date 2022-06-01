@@ -10,7 +10,7 @@ export const mainWork = async (client, interaction) => {
     const alertCollections = collections.filter((collection, index) => {
         const now = new Date().getTime();
         const { lastAlertStamp, name } = collection;
-        const isValid = name !== isValidTrigger(lastAlertStamp, now);
+        const isValid = isValidTrigger(lastAlertStamp, now);
         if (isValid) {
             pQueue.push(getStats(name));
             alertOriginIndex.push(index);
