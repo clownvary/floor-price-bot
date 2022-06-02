@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
-import { getStats, getDb, sendMessage, isValidTrigger, MESSAGE_TYPE, playAlertSound } from './util';
+import { getStats, getDb, sendMessage, isValidTrigger, MESSAGE_TYPE } from './util';
 
 export const mainWork = async (client, interaction) => {
     const db = getDb();
@@ -28,7 +28,6 @@ export const mainWork = async (client, interaction) => {
             lastAlertStamp: now,
         });
         if (floorPrice <= price) {
-            playAlertSound(client);
             sendMessage(
                 client,
                 interaction,
