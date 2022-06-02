@@ -28,6 +28,7 @@ export const mainWork = async (client, interaction) => {
             lastAlertStamp: now,
         });
         if (floorPrice <= price) {
+            playAlertSound(client);
             sendMessage(
                 client,
                 interaction,
@@ -35,7 +36,6 @@ export const mainWork = async (client, interaction) => {
                 MESSAGE_TYPE.INFO,
                 'Wow! Wow! Wow!',
             );
-            playAlertSound(client);
         }
     }
 };

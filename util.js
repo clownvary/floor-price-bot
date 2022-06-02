@@ -8,8 +8,15 @@ import axios from 'axios';
 import { JsonDB } from 'node-json-db';
 import { Config } from 'node-json-db/dist/lib/JsonDBConfig';
 import { MessageEmbed } from 'discord.js';
-import { createAudioPlayer, createAudioResource, joinVoiceChannel,getVoiceConnection   } from '@discordjs/voice';
-import { COMMANDS_DIR_PATH, CHANNEL_ID, WATCH_TIMEOUT, ALERT_INTERNAL, GUILD_ID, VOICE_CHANNEL_ID } from './config';
+import {
+    createAudioPlayer,
+    createAudioResource,
+    joinVoiceChannel,
+    NoSubscriberBehavior,
+    VoiceConnectionStatus,
+    AudioPlayerStatus,
+} from '@discordjs/voice';
+import { COMMANDS_DIR_PATH, CHANNEL_ID, WATCH_TIMEOUT, ALERT_INTERNAL, GUILD_ID, VOICE_CHANNEL_ID, ALERT_PATH } from './config';
 
 const MESSAGE_TYPE = {
     INFO: 'Info',
@@ -118,11 +125,15 @@ const isValidTrigger = (lastAlertStamp, currentStamp) => {
 };
 
 const getPlayer = () => {
-    const player = createAudioPlayer();
-    const resource = createAudioResource('./assets/alert.wav');
+    const player = createAudioPlayer({
+        behaviors: {
+            noSubscriber: NoSubscriberBehavior.Pause,
+        },
+    });
+    const resource = createAudioResource(ALERT_PATH);
     player.play(resource);
     return player;
-}
+};
 const getVoiceConnection = (client) => {
     const connection = joinVoiceChannel({
         channelId: VOICE_CHANNEL_ID,
@@ -130,9 +141,6 @@ const getVoiceConnection = (client) => {
         adapterCreator: client.channels.cache.get(VOICE_CHANNEL_ID).guild.voiceAdapterCreator,
     });
     return connection;
-
-
-
 };
 const playAlertSound = (client) => {
     const player = getPlayer();
@@ -143,10 +151,9 @@ const playAlertSound = (client) => {
         // Unsubscribe after 5 seconds (stop playing audio on the voice connection)
         setTimeout(() => {
             subscription.unsubscribe();
-            connection.destroy();
         }, 10000);
     }
-}
+};
 
 export {
     getCommandFiles,
