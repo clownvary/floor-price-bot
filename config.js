@@ -4,8 +4,6 @@ const ALERT_INTERNAL = 18000; // alert interal seconds unit
 const CLIENT_ID = '966273242228744214';
 const GUILD_ID = '908534355763294208';
 const CHANNEL_ID = '967439236380913664';
-const VOICE_CHANNEL_ID = '981572138005852221';
-const ALERT_PATH = './assets/alert.mp3';
 
 export {
     COMMANDS_DIR_PATH,
@@ -14,6 +12,4 @@ export {
     CLIENT_ID,
     GUILD_ID,
     CHANNEL_ID,
-    VOICE_CHANNEL_ID,
-    ALERT_PATH,
 };

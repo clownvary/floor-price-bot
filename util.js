@@ -8,15 +8,8 @@ import axios from 'axios';
 import { JsonDB } from 'node-json-db';
 import { Config } from 'node-json-db/dist/lib/JsonDBConfig';
 import { MessageEmbed } from 'discord.js';
-import {
-    createAudioPlayer,
-    createAudioResource,
-    joinVoiceChannel,
-    NoSubscriberBehavior,
-    VoiceConnectionStatus,
-    AudioPlayerStatus,
-} from '@discordjs/voice';
-import { COMMANDS_DIR_PATH, CHANNEL_ID, WATCH_TIMEOUT, ALERT_INTERNAL, GUILD_ID, VOICE_CHANNEL_ID, ALERT_PATH } from './config';
+
+import { COMMANDS_DIR_PATH, CHANNEL_ID, WATCH_TIMEOUT, ALERT_INTERNAL, GUILD_ID } from './config';
 
 const MESSAGE_TYPE = {
     INFO: 'Info',
@@ -105,10 +98,12 @@ const getStats = async (collectionName) => {
 
 const isValidNewCollection = async (collectionName, price) => {
     const db = getDb();
+   console.log('in');
     const collections = db.getData('/collections');
     const result = { validName: false, validPrice: false };
     const isExisted = collections.filter((collection) => collection.name === collectionName).length >= 1;
     const { status, data: { stats = {} } = {} } = await getSingleStats(collectionName);
+  console.log('price is ', price);
     if (status === 200 && !isExisted) {
         result.validName = true;
         // watch price must lower than current price
@@ -121,39 +116,16 @@ const isValidNewCollection = async (collectionName, price) => {
 
 // whether current now time is a valid trigger time
 const isValidTrigger = (lastAlertStamp, currentStamp) => {
-    return currentStamp - lastAlertStamp > ALERT_INTERNAL * 1000;
+  let valid = false;
+  if(!lastAlertStamp) {
+     valid = currentStamp - lastAlertStamp > ALERT_INTERNAL * 1000;
+  } else {
+    valid = true;
+  }
+
+    return valid;
 };
 
-const getPlayer = () => {
-    const player = createAudioPlayer({
-        behaviors: {
-            noSubscriber: NoSubscriberBehavior.Pause,
-        },
-    });
-    const resource = createAudioResource(ALERT_PATH);
-    player.play(resource);
-    return player;
-};
-const getVoiceConnection = (client) => {
-    const connection = joinVoiceChannel({
-        channelId: VOICE_CHANNEL_ID,
-        guildId: GUILD_ID,
-        adapterCreator: client.channels.cache.get(VOICE_CHANNEL_ID).guild.voiceAdapterCreator,
-    });
-    return connection;
-};
-const playAlertSound = (client) => {
-    const player = getPlayer();
-    const connection = getVoiceConnection(client);
-    const subscription = connection.subscribe(player);
-    // subscription could be undefined if the connection is destroyed!
-    if (subscription) {
-        // Unsubscribe after 5 seconds (stop playing audio on the voice connection)
-        setTimeout(() => {
-            subscription.unsubscribe();
-        }, 10000);
-    }
-};
 
 export {
     getCommandFiles,
@@ -165,6 +137,5 @@ export {
     getStats,
     isValidTrigger,
     isValidNewCollection,
-    MESSAGE_TYPE,
-    playAlertSound,
+    MESSAGE_TYPE
 };
